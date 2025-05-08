@@ -1,0 +1,2406 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>信息技术模拟测试</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+    <style>
+        /* 自定义样式 */
+        .option.selected {
+            background-color: #22c55e;
+            transform: scale(1.05);
+            transition: all 0.3s ease;
+        }
+
+        .option {
+            transition: all 0.3s ease;
+        }
+
+        button {
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f4f4f4 0%, #e5e7eb 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        #quiz-container {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            width: 90%;
+            max-width: 600px;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        h2 {
+            margin-top: 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        #question-container {
+            margin-bottom: 1.5rem;
+        }
+
+        #options-container {
+            margin-top: 1rem;
+        }
+
+        #feedback-container {
+            margin-top: 1.5rem;
+        }
+
+        #score-container {
+            margin-top: 1.5rem;
+        }
+
+        #true-false-options {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 1rem;
+        }
+
+        #true-false-options div {
+            background-color: #3b82f6;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #true-false-options div.selected {
+            background-color: #1d4ed8;
+        }
+        
+        .question-type {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 0.5rem;
+        }
+        
+        .option-label {
+            font-weight: bold;
+            margin-right: 5px;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 flex justify-center items-center h-screen">
+    <div id="quiz-container" class="bg-white p-8 rounded-lg shadow-md w-full max-w-md fade-in">
+        <div id="question-container">
+            <h2 id="question-number" class="text-xl font-bold mb-2">第 1 题</h2>
+            <p id="question-text" class="text-gray-700 mb-4">题目内容</p>
+            <div id="options-container" class="space-y-2"></div>
+            <div id="true-false-options" style="display: none;"></div>
+            <button id="submit-button" class="bg-yellow-400 hover:bg-yellow-500 text-white font-bold py-2 px-4 rounded mt-4">提交答案</button>
+        </div>
+        <div id="feedback-container" class="mt-4">
+            <p id="feedback-text" class="font-bold"></p>
+            <button id="next-button" style="display: none;" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded mt-2">下一题</button>
+        </div>
+        <div id="score-container" class="mt-4">
+            <h2 class="text-lg font-bold">总得分: <span id="score">0</span></h2>
+        </div>
+    </div>
+    <script>
+        const questions = [
+            {
+                question: "信息活动包括信息的收集、信息的加工、信息存储和（ ）。",
+                options: ["信息传递", "信息革命", "信息技术", "信息库"],
+                answer: "A",
+                type: "single"
+            },
+            {
+                question: "信息技术包括计算机技术、网络技术和（ ）。",
+                options: ["编码技术", "电子技术", "显示技术", "通信技术"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "以下哪些属于信息技术的范畴（可多选）。",
+                options: ["计算机技术", "网络技术", "通信技术", "电子技术"],
+                answer: "ABCD",
+                type: "multiple"
+            },
+            {
+                question: "关于信息的产生，正确的说法是（ ）。",
+                options: ["电脑发明以后", "语言发明以后", "文字发明以后", "一直就有"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "指出下列哪一个不是多媒体信息中可以包含的表现形式（ ）。",
+                options: ["文本", "声音", "光盘", "图像"],
+                answer: "C",
+                type: "single"
+            },
+            {
+                question: "两个事物之间的信息传递，叫做（ ），也叫做信息传递过程。",
+                options: ["信道", "信宿", "信源", "通信"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "人们在生产和生活中，有意识或无意识所做的信息处理和利用的活动过程，称为（ ）。",
+                options: ["信息活动", "通信", "信息", "信息技术"],
+                answer: "A",
+                type: "single"
+            },
+            {
+                question: "现代信息技术的核心是（ ）、多媒体技术和网络技术。",
+                options: ["计算机技术", "通信技术", "电视技术", "信息技术"],
+                answer: "A",
+                type: "single"
+            },
+            {
+                question: "小红通过因特网找到了一些关于环境保护的文章和图片，制作成网站，发布在学校的网站上，这属于信息的（ ）。",
+                options: ["传递", "加工", "收集", "以上都是"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "医生用听诊器为病人听诊属于信息处理过程中的（ ）。",
+                options: ["信息存储", "信息收集", "信息传递", "信息加工"],
+                answer: "B",
+                type: "single"
+            },
+            {
+                question: "以下属于信息的是（ ）。① 报纸报道上海世博会每天的入园情况；② 电视新闻报道电影《西风烈》 10 月 23 日在北京首映礼的盛况；③ 每年 3 月 5 日校园爱心捐款的情景；④ 网站、 图书馆、 电视台、学生成长手册；",
+                options: ["③④", "①③④", "②③④", "①②③"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "信息系统的安全目标主要体现为（ ）。",
+                options: ["信息保护和系统保护", "软件保护", "硬件保护", "网络保护"],
+                answer: "A",
+                type: "single"
+            },
+            {
+                question: "信息系统的安全主要考虑（ ）方面的安全。",
+                options: ["环境", "软件", "硬件", "上述所有"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "关于多媒体技术的叙述错误的是（ ）。",
+                options: ["多媒体技术是计算机技术融合音频、视频和通信技术的产物", "数字电视、可视电话都是多媒体技术发展的产物", "它是处理声音信息的计算机技术", "它具有集成性和交互性"],
+                answer: "C",
+                type: "single"
+            },
+            {
+                question: "利用计算机将文字、声音、图形、图像和视频等多种媒体有机结合起来进行处理的技术称为（ ）。",
+                options: ["影音技术", "通信技术", "网络技术", "多媒体技术"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "下面属于信息的是（ ）。",
+                options: ["程序", "程序语言", "软件", "显示器上显示出的内容"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "王小强用手机照了几张同学们活动的图片，准备用在班级的电子报刊中。他的这个过程是信息的（ ）过程。",
+                options: ["采集", "加工", "绘制", "合成"],
+                answer: "A",
+                type: "single"
+            },
+            {
+                question: "你们班的小明和小花在预习课文时，通过微信讨论关于查到的作者背景资料，他们使用微信是利用了信息的（ ）过程。",
+                options: ["收集", "传递", "加工", "整理"],
+                answer: "B",
+                type: "single"
+            },
+            {
+                question: "微信是一种新的跨平台的通讯工具，下面说法不正确的是（ ）。",
+                options: ["支持单人、多人的通讯交流", "只能发送文字，不能发送图片、视频、声音", "微信提供公众平台、朋友圈、消息推送等功能", "用户可以通过 '摇一摇'、'搜索号码'、'附近的人'、扫二维码方式添加好友"],
+                answer: "B",
+                type: "single"
+            },
+            {
+                question: "存储容量的基本单位是（ ）。",
+                options: ["字长", "字节", "位", "字"],
+                answer: "B",
+                type: "single"
+            },
+            {
+                question: "下列选项，不能称为信息的是（ ）。",
+                options: ["报上登载'神七成功进行出舱活动'的消息", "信息技术课本", "电视中播出的奥运会各国金牌数", "高中信息技术水平测试成绩"],
+                answer: "B",
+                type: "single"
+            },
+            {
+                question: "在下列选项中，信息的可信度最高的是（ ）。",
+                options: ["某权威股评家 blog 上的股市走势预测", "某省气象台网站上的天气预报", "某民间培训机构发布的模拟测试卷", "某彩票网站发布的下期彩票预测"],
+                answer: "B",
+                type: "single"
+            },
+            {
+                question: "计算机处理信息的全过程是（ ）。",
+                options: ["输出，处理，存贮", "输入，存储，处理", "输出，存贮，输入", "输入，存储与处理，输出"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "计算机的硬件系统是由输入设备和输出设备以及（ ）组成。",
+                options: ["CPU、控制器、存储器", "运算器、控制器、存储器", "运算器、存储器", "CPU、运算器、存储器"],
+                answer: "B",
+                type: "single"
+            },
+            {
+                question: "能够直接被计算机接收、存储、传输、和处理的信号是（ ）。",
+                options: ["电视信号", "模拟信号", "数字信号", "录像带信号"],
+                answer: "C",
+                type: "single"
+            },
+            {
+                question: "一个完整的计算机系统由（ ）组成。",
+                options: ["硬件和软件", "中央处理器和内存", "内存和外存", "硬件系统和软件系统"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "某台计算机的配置为 'Intel 奔腾双核 E5400 2.7GHz/金士顿 4GB DDR2 800/希捷 500GB 7200/三星 DVD 52X'，则其内存的容量是（ ）。",
+                options: ["2.7GHz", "500GB", "4G", "52X"],
+                answer: "C",
+                type: "single"
+            },
+            {
+                question: "电子计算机发展到今天已经经历了四代，按时间顺序是（ ）。",
+                options: ["电子管、晶体管、集成电路和大规模集成电路时代", "晶体管、电子管、集成电路和大规模集成电路时代", "电子管、晶体管、大规模集成电路和集成电路时代", "晶体管、电子管、大规模集成电路和集成电路时代"],
+                answer: "A",
+                type: "single"
+            },
+            {
+                question: "在计算机系统中，具有输入功能的设备是（ ）。",
+                options: ["打印机和磁盘驱动器", "显示器和打印机", "键盘和主机", "键盘和鼠标"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "我们在购买手机或电脑时，商家常以 '双核或四核' 为亮点向顾客介绍产品，'双核或四核' 指的是手机或电脑中的（ ）。",
+                options: ["外壳", "中央处理器", "显示器", "刷新频率"],
+                answer: "B",
+                type: "single"
+            },
+            {
+                question: "现在计算机的内存容量一般为 4G，而 5 年前电脑的内存一般为 512M，那么现在的内存容量是 5 年前的（ ）。",
+                options: ["2 倍", "4 倍", "6 倍", "8 倍"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "USB 是 Universal Serial Bus 的英文缩写，中文名称为 '通用串行总线'。一个 USB 接口可以支持（ ）设备。",
+                options: ["一种", "两种", "多种", "以上三者"],
+                answer: "C",
+                type: "single"
+            },
+            {
+                question: "未来计算机发展的总趋势是（ ）。",
+                options: ["微型化", "巨型化", "智能化", "数字化"],
+                answer: "C",
+                type: "single"
+            },
+            {
+                question: "当前，随着单碟 500G 技术全面普及，下面哪个硬盘容量正在成为台式机主流配置（ ）。",
+                options: ["500G", "1000G", "1T", "5T"],
+                answer: "C",
+                type: "single"
+            },
+            {
+                question: "在下图中，哪个图标是快捷方式（ ）。",
+                options: ["A", "B", "C", "D"],
+                answer: "B",
+                type: "single"
+            },
+            {
+                question: "多媒体计算机是指（ ）。",
+                options: ["具有多种外部设备的计算机", "能与多种电器连接的计算机", "能处理多种媒体的计算机", "借助多种媒体操作的计算机"],
+                answer: "C",
+                type: "single"
+            },
+            {
+                question: "课堂教学中，老师常利用 '教学课件' 帮助我们学习，这种 '教学课件' 的使用是（ ）的应用。",
+                options: ["网络技术", "多媒体技术", "影像技术", "计算机技术"],
+                answer: "B",
+                type: "single"
+            },
+            {
+                question: "下列设备中，（ ）不可用于采集数字图像。",
+                options: ["扫描仪", "数码相机", "录音笔", "摄像头"],
+                answer: "C",
+                type: "single"
+            },
+            {
+                question: "下列设备不属于输入设备的是（ ）。",
+                options: ["A", "B", "C", "D"],
+                answer: "C",
+                type: "single"
+            },
+            {
+                question: "下面左图中的 U 盘应与右图主机背部面板中哪一个接口相连（ ）。",
+                options: ["A", "B", "C", "D"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "小杰对电脑说 '请打印'，电脑马上执行了打印命令，这其中主要应用了人工智能中的（ ）。",
+                options: ["图像识别技术", "指纹识别技术", "语音识别技术", "字符识别技术"],
+                answer: "C",
+                type: "single"
+            },
+            {
+                question: "我的电脑窗口属于下列（ ）。",
+                options: ["应用程序窗口", "文件夹窗口", "对话框窗口", "都不属于"],
+                answer: "B",
+                type: "single"
+            },
+            {
+                question: "攻击者发送大量声称来自银行或其他知名机构的欺骗性垃圾邮件，意图引诱收信人给出敏感信息的攻击手段是（ ）。",
+                options: ["社会工程学", "网络钓鱼", "旁路攻击", "授权侵犯"],
+                answer: "B",
+                type: "single"
+            },
+            {
+                question: "下列不属于音频文件的是（ ）。",
+                options: [".cda", ".mp3", ".wav", ".bmp"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "下列不属于视频文件的是（ ）。",
+                options: [".avi", ".mpg", ".mp4", ".mp3"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "快捷方式确切的含义是（ ）。",
+                options: ["特殊文件夹", "某文件的副本", "各类可执行文件", "指向某对象的指针"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "如果 '资源管理器' 中有一个空文件夹，用鼠标点击，对应的右边的窗口（ ）。",
+                options: ["显示原先的内容", "显示空白", "原先的内容将被复制到该文件夹", "电脑提示操作出错"],
+                answer: "B",
+                type: "single"
+            },
+            {
+                question: "文件操作中粘贴文件的快捷键是（ ）。",
+                options: ["Ctrl+X", "Ctrl+S", "Ctrl+C", "Ctrl+V"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "下面有关 Windows 系统下应用程序窗口的叙述，正确的是（ ）。",
+                options: ["屏幕上只能有一个应用程序窗口", "屏幕上能有多个应用程序窗口，但只有一个是活动窗口", "屏幕上能有多个应用程序窗口，也可以都是活动窗口", "有的应用程序的用户界面不以窗口形式出现"],
+                answer: "B",
+                type: "single"
+            },
+            {
+                question: "选择多个不连续的文件或文件夹时，应按住（ ）键。",
+                options: ["Ctrl", "Shift", "Alt", "Ctrl+Tab"],
+                answer: "A",
+                type: "single"
+            },
+            {
+                question: "资源管理器左边窗口中的文件夹前的 '+' 表示（ ）。",
+                options: ["该文件夹包含子文件夹", "文件夹的增加", "文件夹的移动", "等同数学中的 '+'"],
+                answer: "A",
+                type: "single"
+            },
+            {
+                question: "Windows 的文件夹结构是一种（ ）。",
+                options: ["关系结构", "树形结构", "对象结构", "网状结构"],
+                answer: "B",
+                type: "single"
+            },
+            {
+                question: "Windows 中主文件名的长度最大为（ ）个字符。",
+                options: ["255", "256", "225", "无限长"],
+                answer: "A",
+                type: "single"
+            },
+            {
+                question: "完整的计算机文件名包括主文件名和扩展名，其中扩展名表示的是（ ）。",
+                options: ["该文件的大小", "该文件的存储位置", "该文件的类型", "该文件的属性"],
+                answer: "C",
+                type: "single"
+            },
+            {
+                question: "要查找第三个字母为 r 的所有文件，正确的通式是（ ）。",
+                options: ["*r.*", "?r?.*", "?r*.*", "??r*.*"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "在计算机软件系统中，下列软件不属于应用软件的是（ ）。",
+                options: ["office 2003", "美图秀秀", "Windows", "多米音乐"],
+                answer: "C",
+                type: "single"
+            },
+            {
+                question: "资源共享包括硬件资源共享、软件资源共享和（ ）。",
+                options: ["光驱共享", "数据资源共享", "打印机共享", "存储空间共享"],
+                answer: "B",
+                type: "single"
+            },
+            {
+                question: "在 Windows 中打开一个菜单，某菜单项会出现级联菜单的标识是（ ）。",
+                options: ["菜单项右侧有一组英文提示", "菜单项右侧有一个黑色三角形", "菜单项右侧有一个黑色圆点", "菜单项右侧有一个省略号"],
+                answer: "B",
+                type: "single"
+            },
+            {
+                question: "下列说法错误的是（ ）。",
+                options: ["选择指定的文件，按 Delete 键，可以删除文件", "将选定的文件拖拽到 '回收站' 中，可以删除文件", "使用 '还原' 命令，可以把 '回收站' 中的文件恢复到原来文件夹中", "被删除的文件都在回收站中"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "运行程序过程中，需要等待时，鼠标指针的形状会变成（ ）。",
+                options: ["沙漏", "手指", "I 型", "十字型"],
+                answer: "A",
+                type: "single"
+            },
+            {
+                question: "Windows 中，在树型目录结构下，不允许两个文件名（包括扩展名）相同指的是在（ ）。",
+                options: ["不同磁盘的不同目录下", "不同的磁盘的同一个目录下", "同一个磁盘的不同目录下", "同一个磁盘的同一个目录下"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "在 windows 中，下面正确的文件名是（ ）。",
+                options: ["file1\\1.doc", "a198.xls", "student :.ppt", "read?.txt"],
+                answer: "B",
+                type: "single"
+            },
+            {
+                question: "在资源管理器中，将文件夹 'C:\\test1' 中的文件 'photo.jpg' 用鼠标左键拖动到文件夹 'D:\\test2' 中，那么这个文件将（ ）。",
+                options: ["被移动", "被复制", "被删除", "被移动或者被复制"],
+                answer: "B",
+                type: "single"
+            },
+            {
+                question: "一个文件夹图标带有被手托住的标志，表示该文件夹已经设为（ ）。",
+                options: ["专用", "不可用", "网络", "共享"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "2012 年 10 月 26 日微软正式推出了新一代操作系统 Windows 8，下面关于 Windows 8 的叙述错误的是（ ）。",
+                options: ["Windows 8 的上一代系统是 Windows XP", "Windows 8 有 2 个模式，桌面模式很像 Windows 7", "Windows 8 可以安装在平板电脑上", "Windows 8 支持触控操作"],
+                answer: "A",
+                type: "single"
+            },
+            {
+                question: "下面关于安卓系统和苹果 IOS 系统的描述错误的是（ ）。",
+                options: ["苹果 IOS 系统是完全封闭的系统，只运行在苹果自己的手机 iPhone 上，其他厂商一律没法使用", "苹果 IOS 系统与硬件的整合度高，使用非常的流畅", "安卓系统的发行商是微软公司", "安卓系统是开源的，软件发布基本无限制"],
+                answer: "C",
+                type: "single"
+            },
+            {
+                question: "下列格式中，（ ）是图像文件格式。",
+                options: ["BMP 格式", "MP3 格式", "MIDI 格式", "WAV 格式"],
+                answer: "A",
+                type: "single"
+            },
+            {
+                question: "教育系统使用的学籍管理软件属于（ ）。",
+                options: ["应用软件", "共享软件", "系统软件", "自由软件"],
+                answer: "A",
+                type: "single"
+            },
+            {
+                question: "在回收站中不可以完成的操作是（ ）。",
+                options: ["恢复文件", "删除文件", "打开文件", "清空回收站"],
+                answer: "C",
+                type: "single"
+            },
+            {
+                question: "回收站是（ ）区域的一块空间，可以暂时存放已删除的文件和文件夹。",
+                options: ["硬盘", "内存", "缓存", "网络云盘"],
+                answer: "A",
+                type: "single"
+            },
+            {
+                question: "数学老师自己设计制作的多媒体教学课件是属于（ ）。",
+                options: ["系统软件", "杀毒软件", "应用软件", "压缩软件"],
+                answer: "C",
+                type: "single"
+            },
+            {
+                question: "在 Windows 环境中，系统默认的中文输入法的 '半角/全角' 切换键是（ ）。",
+                options: ["Ctrl+Alt", "Ctrl+空格", "Shift+空格", "Ctrl+Shift"],
+                answer: "C",
+                type: "single"
+            },
+            {
+                question: "如果要输入一个双字符键的上档字符，比如要输入数字键 8 上的字符 *，可采用的办法是（ ）。",
+                options: ["Alt+8", "Ctrl+8", "Tab+8", "Shift+8"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "在 Windows 系统中，文件名中不允许使用（ ）。",
+                options: ["英文字母", "中文汉字", "数字", "某些特殊符号"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "U 盘是一种（ ）。",
+                options: ["控制器", "运算器", "内存储器", "移动存储器"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "我们在购买手机或电脑时，商家常以 '双核或四核' 为亮点向顾客介绍产品，'双核或四核' 指的是手机或电脑中的（ ）。",
+                options: ["外壳", "中央处理器", "显示器", "刷新频率"],
+                answer: "B",
+                type: "single"
+            },
+            {
+                question: "通过（ ）可以查看一个文件占用磁盘空间的大小。",
+                options: ["属性", "打开", "复制", "剪切"],
+                answer: "A",
+                type: "single"
+            },
+            {
+                question: "（ ）是内存储器的一部分，CPU 对其只取不存。",
+                options: ["ROM", "RAM", "CMOS", "寄存器"],
+                answer: "A",
+                type: "single"
+            },
+            {
+                question: "目前，很多人都喜欢搜狗输入法，其状态框中的半月型符号代表（ ）。",
+                options: ["中/英文切换", "全/半角切换", "软键盘按钮", "中/英文标点切换"],
+                answer: "B",
+                type: "single"
+            },
+            {
+                question: "'烽火连三月，家书抵万金'。'烽火'、'家书'在古时侯都是用来传递信息的，而现在可用电话、电子邮件传递信息，这说明（ ）。",
+                options: ["电子邮件可以完全取代传统的信函", "类似烽火一样的这种传递信息的方式将会消失", "古老的信息技术我们可以不用了", "古老的信息技术与现代信息技术融合一起继续发挥作用"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "下面属于信息技术应用的例子是（ ）。① 三维动画游戏 ② 网上购物 ③ 电子邮件 ④ 个性化手机 ⑤ 语音输入",
+                options: ["①③④", "②③④⑤", "①②③⑤", "①②③④⑤"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "对于裸机来说，首先必须安装的软件应该是（ ）。",
+                options: ["数据库软件", "应用软件", "操作系统", "文字处理软件"],
+                answer: "C",
+                type: "single"
+            },
+            {
+                question: "下列关于密码设置表述错误的是（ ）。",
+                options: ["一般不要设置和帐号相同的密码", "定期更换密码，以防密码泄露", "为了方便记忆，密码可以使用姓名汉语拼音的缩写或生日的简单组合", "密码设置越长，用穷举法破解的概率越低"],
+                answer: "C",
+                type: "single"
+            },
+            {
+                question: "'你有一个苹果，我有一个苹果，彼此交换一下，我们仍然是各有一个苹果。如果你有一种思想，我也有一种思想，我们相互交流，我们就都有了两种思想，甚至更多'，这体现了信息的（ ）。",
+                options: ["载体依附性", "时效性", "共享性", "价值性"],
+                answer: "C",
+                type: "single"
+            },
+            {
+                question: "打印页码 2-5,10,12 表示打印的是（ ）。",
+                options: ["第 2 页，第 5 页，第 10 页，第 12 页", "第 2 至 5 页，第 10 至 12 页", "第 2 至 5 页，第 10 页，第 12 页", "第 2 页，第 5 页，第 10 至 12 页"],
+                answer: "C",
+                type: "single"
+            },
+            {
+                question: "一篇 Word 文档中的四段文字分别使用了 '四号'、'五号'、'16 磅'、'18 磅' 四种字号设置，则所设定文字的大小比较（ ）。",
+                options: ["'四号' 大于 '五号'", "'16 磅' 大于 '18 磅'", "字的大小一样，字体不同", "'四号' 小于 '五号'"],
+                answer: "A",
+                type: "single"
+            },
+            {
+                question: "一位同学正在撰写毕业论文，并且要求只用 A4 规格的纸输出，在打印预览中，发现最后一页只有一行，他想把这一行提到上一页，下面可行的办法是（ ）。",
+                options: ["改变纸张大小", "增大页边距", "减小页边距", "把页面方向改为横向"],
+                answer: "C",
+                type: "single"
+            },
+            {
+                question: "在 word 中，给选定的段落、单元格图文框添加背景称为（ ）。",
+                options: ["图文框", "底纹", "表格", "边框"],
+                answer: "B",
+                type: "single"
+            },
+            {
+                question: "在 Word 文档中将插入点定位于句子 '飞流直下三千尺' 中的 '直' 与 '下' 之间，按一下 Delete 键，则该句子（ ）。",
+                options: ["变为 '飞流下三千尺'", "变为 '飞流直三千尺'", "整句被删除", "不变"],
+                answer: "B",
+                type: "single"
+            },
+            {
+                question: "在使用 Word 编辑文档时，假设插入点在第一段最末位置，如果按 delete 键，其结果是（ ）。",
+                options: ["把第一段删除", "把第一段和第二段合并成一段", "仅删除第一段最末行的最后一个字符", "把第二段的第一个字符删除"],
+                answer: "B",
+                type: "single"
+            },
+            {
+                question: "在 Word 的编辑状态下，选择了整个表格，然后按 Delete 键，则（ ）。",
+                options: ["整个表格被删除", "表格中一列被删除", "表格中的一行被删除", "表格中的字符被删除"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "王芳用 Word 制作电子报刊作品时，需要将某图片作为一段文字的背景。操作过程为：插入图片文件后，设置图片格式，将版式设置为（ ）。",
+                options: ["嵌入型", "四周型", "衬于文字下方", "紧密型"],
+                answer: "C",
+                type: "single"
+            },
+            {
+                question: "在 Word 中用拼音输入法输入汉字 '绿'、'女' 等字时，用下列（ ）键代替 U。",
+                options: ["U", "V", "o 或 e", "空格"],
+                answer: "B",
+                type: "single"
+            },
+            {
+                question: "在 WORD 表格中一次性插入 3 行，正确的方法是（ ）。",
+                options: ["在 '设计' 主选项卡中可以插入", "把插入点放在行尾部，按回车", "在 '插入' 主选项卡中选择 '表格' 选项卡的插入表格，选定 3 行可直接插入", "无法实现"],
+                answer: "C",
+                type: "single"
+            },
+            {
+                question: "如图所示，WORD 中，该文稿采用的排版方式是（ ）。",
+                options: ["图文混排", "框架结构", "纵横混排", "设置分栏"],
+                answer: "A",
+                type: "single"
+            },
+            {
+                question: "在用 word 进行文字编辑、排版，执行误操作后可以使用常用工具栏中哪一个按钮来取消前一次操作（ ）。",
+                options: ["A", "B", "C", "D"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "用 word 制作电子报刊时，需要将某图片作为一段文字的背景，其过程为：插入图片文件后，设置图片格式，将版式设置为（ ）。",
+                options: ["四周型", "嵌入型", "衬于文字下方", "浮于文字上方"],
+                answer: "C",
+                type: "single"
+            },
+            {
+                question: "Word2010 文档扩展名的默认类型是（ ）。",
+                options: ["DOCX", "DOC", "DOTX", "DAT"],
+                answer: "A",
+                type: "single"
+            },
+            {
+                question: "Word2010 窗口界面的组成部分中，除常见的组成元素外，还新增加的元素是（ ）。",
+                options: ["标题栏", "快速访问工具栏", "状态栏", "滚动条"],
+                answer: "B",
+                type: "single"
+            },
+            {
+                question: "在 Word 中，如果在有文字的区域绘制图形，则在文字与图形的重叠部分（ ）。",
+                options: ["文字不可能被覆盖", "文字可能被覆盖", "文字小部分被覆盖", "文字大部分被覆盖"],
+                answer: "B",
+                type: "single"
+            },
+            {
+                question: "下面有关 word2010 表格功能的说法不正确的是（ ）。",
+                options: ["可以通过表格工具将表格转换成文本", "表格的单元格中可以插入表格", "表格中可以插入图片", "不能设置表格的边框线"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "在 PowerPoint 中，为幻灯片添加超级链接，要在（ ）命令中设置。",
+                options: ["'插入' 选项卡中的 '超级链接'", "'视图' 选项卡中的 '备注页'", "'文件' 选项卡中的 '页面设置'", "'动画' 选项卡中的 '超级链接'"],
+                answer: "A",
+                type: "single"
+            },
+            {
+                question: "PowerPoint 中，在浏览视图下，按住 CTRL 并拖动某幻灯片，可以完成（ ）操作。",
+                options: ["移动幻灯片", "选定幻灯片", "删除幻灯片", "复制幻灯片"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "王磊把在家里制作好的多媒体演示文稿 '班级简介.ppt' 拿到学校播放时，遇到了问题：双击 '班级简介.ppt' 图标后，系统提示 '不能打开此文件......' 或者出现 '打开方式' 对话框，可能的原因是（ ）。",
+                options: ["没有将有关的音频文件复制到学校的电脑中", "电脑没有上网", "该电脑没有安装 PowerPoint 软件", "电脑显示器有问题，出现故障"],
+                answer: "C",
+                type: "single"
+            },
+            {
+                question: "在幻灯片中，若将已有的一幅图片放置在标题文本框的下面，则正确的操作方法是：选中 '图片' 对象，单击 '叠放次序' 命令中（ ）。",
+                options: ["置于文字上方", "置于文字下方", "置于顶层", "置于底层"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "在演示文稿中，插入超级链接时所链接的目标，不能是（ ）。",
+                options: ["另一个演示文稿", "同一演示文稿的某一张幻灯片", "其他应用程序的文档", "幻灯片中的某个对象"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "关于自定义动画的设置，以下不正确的说法是（ ）。",
+                options: ["各种对象均可设置动画效果", "同时还可设置动画效果的声音", "可将对象设置成播放后隐藏", "自定义动画设置后，先后顺序不可改变"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "要使幻灯片在放映时实现在不同幻灯片之间的跳转，需要为其设置（ ）。",
+                options: ["超级链接", "自定义动画", "幻灯片切换", "录制旁白"],
+                answer: "A",
+                type: "single"
+            },
+            {
+                question: "要使幻灯片中的某个对象进入时呈现 '百叶窗' 效果，应该（ ）。",
+                options: ["单击 '幻灯片放映/动作设置' 进行设置", "单击 '幻灯片放映/设置放映方式' 进行设置", "单击 '幻灯片放映/自定义动画' 进行设置", "单击 '幻灯片放映/幻灯片切换' 进行设置"],
+                answer: "C",
+                type: "single"
+            },
+            {
+                question: "在 PowerPoint 中，要实现幻灯片之间的任意切换，除了使用超链接外，还可通过添加（ ）来实现。",
+                options: ["鼠标选取", "放映按钮", "动作按钮", "滚动条"],
+                answer: "C",
+                type: "single"
+            },
+            {
+                question: "如果要从一个幻灯片淡入到下一个幻灯片，应使用菜单 '幻灯片放映' 中的（ ）命令进行设置。",
+                options: ["动作按钮", "预设动画", "幻灯片切换", "自定义动画"],
+                answer: "C",
+                type: "single"
+            },
+            {
+                question: "PowerPoint 的 '设计模板' 包含（ ）。",
+                options: ["预定义的幻灯片版式", "预定义的幻灯片背景颜色", "预定义的幻灯片配色方案", "预定义的幻灯片样式和配色方案"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "PowerPoint 2010 中新建文件的默认名称是（ ）。",
+                options: ["DOCl", "SHEETl", "演示文稿 1", "BOOKl"],
+                answer: "C",
+                type: "single"
+            },
+            {
+                question: "按住鼠标左键，并拖动幻灯片到其他位置是进行幻灯片的操作。",
+                options: ["移动", "复制", "删除", "插入"],
+                answer: "A",
+                type: "single"
+            },
+            {
+                question: "在 PowerPoint 中，安排幻灯片对象的布局可选择（ ）来设置。",
+                options: ["配色方案", "背景", "应用设计模板", "幻灯片版式"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "遮罩动画中，遮罩层与被遮罩层的关系是（ ）。",
+                options: ["遮罩层在被遮罩层之上", "遮罩层与被遮罩层没有上下关系", "遮罩层在被遮罩层之下", "以上都不是"],
+                answer: "A",
+                type: "single"
+            },
+            {
+                question: "小明用 Flash 软件制作文字变形动画，希望将第一帧输入的 'one' 变形成 20 帧输入的 'two'。在第 1 帧和第 20 帧之间设置了形状补间，完成动画后还要进行的操作是（ ）。",
+                options: ["仅对第 1 帧中文字对象执行分离操作", "仅对第 20 帧中文字对象执行分离操作", "必须对第 1 帧和第 20 帧中文字对象分别执行分离操作", "不用进行任何操作，动画就已经是正确的了"],
+                answer: "C",
+                type: "single"
+            },
+            {
+                question: "在 flash 中，时间轴上的小格子称为（ ）。",
+                options: ["图层", "帧", "演员", "场景"],
+                answer: "B",
+                type: "single"
+            },
+            {
+                question: "关于在 Flash 中引导层里面画的轨迹线，下列说法正确的是（ ）。",
+                options: ["必须是黑色", "必须是封闭的", "必须是用铅笔画的", "轨迹线可以交叉"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "在 flash 中（ ）是可以重复利用的动画对象在库中存在的形式？",
+                options: ["元件", "图层", "场景", "帧"],
+                answer: "A",
+                type: "single"
+            },
+            {
+                question: "绘制有立体感的小球，应该使用（ ）填充模式。",
+                options: ["纯色", "位图", "线性", "放射状"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "若在默认的帧频设置下，一个 1 分钟的 flash 动画，应该有（ ）帧。",
+                options: ["480", "560", "600", "720"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "在 flash 中，帧就是（ ）。",
+                options: ["动画", "画面", "舞台", "时间"],
+                answer: "B",
+                type: "single"
+            },
+            {
+                question: "变形补间动画不能完成的效果是（ ）。",
+                options: ["小球的直线运动", "小球的大小变化", "小球的颜色变化", "小球沿引导线运动"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "flash 中刚导入的声音文件并不在舞台上，那么它存在于（ ）。",
+                options: ["关键帧", "库", "图层", "场景"],
+                answer: "B",
+                type: "single"
+            },
+            {
+                question: "在 FLASH 生成的文件类型中，我们常说的源文件是指（ ）。",
+                options: ["SWF", "FLA", "EXE", "HTML"],
+                answer: "B",
+                type: "single"
+            },
+            {
+                question: "下列文件格式不属于 Flash 文件导出格式的是（ ）。",
+                options: [".doc", ".swf", ".exe", ".htm"],
+                answer: "A",
+                type: "single"
+            },
+            {
+                question: "下列文件格式不属于 Flash 文件导出格式的是（ ）。",
+                options: [".exe", ".swf", ".ppt", ".htm"],
+                answer: "C",
+                type: "single"
+            },
+            {
+                question: "若要制作 '种子发芽' 动画，表现出各个萌发阶段的 '种子' 状态，需按照（ ）动画的创建方法来完成设计、制作过程。",
+                options: ["引导层", "形状补间", "逐帧", "动作补间"],
+                answer: "C",
+                type: "single"
+            },
+            {
+                question: "在 Flash 中，动画制作完成后，想要测试动画的播放效果，需使用（ ）键进行测试。",
+                options: ["Space+Enter", "Ctrl+Enter", "Shift+Enter", "Alt+Enter"],
+                answer: "B",
+                type: "single"
+            },
+            {
+                question: "（ ）动画是通过设定组件在场景中的位置变化来形成动画的方式。",
+                options: ["引导层", "逐帧", "形状补间", "动作补间"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "下图中哪个图层中配有声音（ ）。",
+                options: ["图层 1", "图层 2", "图层 3", "图层 4"],
+                answer: "B",
+                type: "single"
+            },
+            {
+                question: "如图所示选中的 '图层 1' 是（ ）。",
+                options: ["普通图层", "遮罩层", "被遮罩层", "引导层"],
+                answer: "C",
+                type: "single"
+            },
+            {
+                question: "在 Flash 中，（ ）是专门用来选取对象的工具。",
+                options: ["铅笔工具", "选取工具", "线条工具", "矩形工具"],
+                answer: "B",
+                type: "single"
+            },
+            {
+                question: "下类哪种类型不属于 Flash 中的符号（也称为元件）（ ）。",
+                options: ["图形", "按钮", "音频", "影片剪辑"],
+                answer: "C",
+                type: "single"
+            },
+            {
+                question: "在 Flash 中，如果某位同学要制作《弯月变满月》的动画，使用哪种动画制作技术手段最为方便（ ）。",
+                options: ["逐帧动画", "形状补间动画", "动作补间动画", "引导层动画"],
+                answer: "B",
+                type: "single"
+            },
+            {
+                question: "如果某位同学要使用 Flash 制作《月亮围绕地球旋转》的动画，使用哪种动画制作技术手段最为方便（ ）。",
+                options: ["逐帧动画", "动作补间动画", "形状补间动画", "引导层动画"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "在 Flash 的时间轴上连续插入如图所示的人形图像，形成人物跳远的动画是（ ）。",
+                options: ["动作动画", "形状动画", "逐帧动画", "以上都有可能"],
+                answer: "C",
+                type: "single"
+            },
+            {
+                question: "计算机网络的功能主要是信息交换、（ ）和分布式计算。",
+                options: ["数据共享", "资源共享", "硬件共享", "软件共享"],
+                answer: "B",
+                type: "single"
+            },
+            {
+                question: "网络的基本拓扑结构不包括（ ）。",
+                options: ["星型", "环型", "树型", "总线型"],
+                answer: "C",
+                type: "single"
+            },
+            {
+                question: "下列 IP 地址，哪个是合法的（ ）。",
+                options: ["192.168.265.1", "127.0,00", "212.211.43 ;", "211.98.222.1"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "小明想给同学通过 E-mail 传送 PPT 电子文稿，可以使用的办法是（ ）。",
+                options: ["在邮件内容中写上有 PPT 文件", "把 PPT 文件复制，然后粘贴在邮件内容里", "无法办到", "通过上传附件完成 PPT 文稿的发送"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "小亮把网上关于 '最美教师张丽莉' 的图片下载到自己的电脑中，他下载时享受的网络服务类型是（ ）。",
+                options: ["信息浏览", "远程登陆", "即时短信", "文件传输"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "若 E-mail 地址为：tsxxjs@126.com，那么它的用户名是（ ）。",
+                options: ["tsxxjs", "@126.com", "126", "com"],
+                answer: "A",
+                type: "single"
+            },
+            {
+                question: "在网吧或者在公共场所上网，登录自己的邮箱查看邮件，下列（ ）行为是恰当的。",
+                options: ["选择让电脑记住自己的登录密码和帐号", "从邮箱下载自己的文件查看后，不必从电脑中彻底删除", "使用完邮箱后，选择从邮箱安全退出", "查看邮件中途有事离开，不需要从邮箱退出"],
+                answer: "C",
+                type: "single"
+            },
+            {
+                question: "张芳从网上替同学购买一张回家的火车票，她所需的信息是（ ）。",
+                options: ["铁路售票官方网站的网址", "网站购票可以提前售票的天数", "同学的身份证号", "以上都包括"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "网络游戏对青少年的吸引力越来越强，以下做法正确的是（ ）。",
+                options: ["寻找免费账户，流连忘返", "不参与内容不健康的游戏", "筹备资金，尽情游戏", "尽量拉更多同学一起玩"],
+                answer: "B",
+                type: "single"
+            },
+            {
+                question: "一座大楼内的一个计算机网络系统，一般属于（ ）。",
+                options: ["PAN", "LAN", "MAN", "WAN"],
+                answer: "B",
+                type: "single"
+            },
+            {
+                question: "下列哪个选项不属于中学生文明上网行为？（ ）。",
+                options: ["不浏览网上的不健康信息，也不尝试网上的冒险行为", "对于网上的虚假消息，我们不主动浏览、不随意散布", "上网要适度，决不沉迷于网络游戏", "可以尝试通过网络未经允许侵入他人计算机"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "计算机网络系统又可分为（ ）。",
+                options: ["网络协议和网络安全", "网络服务器和网络协议", "网络硬件系统和网络软件系统", "网络操作系统和网络通信系统"],
+                answer: "C",
+                type: "single"
+            },
+            {
+                question: "按通信距离或网络的规模可分为局域网、城域网和（ ）。",
+                options: ["因特网", "宽带网", "基带网", "广域网"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "提供计算服务、资源服务和网络管理服务的计算机都被称为（ ）。",
+                options: ["服务器", "网关", "客户机", "交换机"],
+                answer: "A",
+                type: "single"
+            },
+            {
+                question: "享用服务的计算机就是网络用户，被称为（ ）。",
+                options: ["交换机", "网关", "客户机", "服务器"],
+                answer: "C",
+                type: "single"
+            },
+            {
+                question: "下列选项中关于 360 浏览器的说法中不正确的是（ ）。",
+                options: ["能将上网痕迹清理", "可以自定义安全级别", "不自带网络收藏夹功能", "可对网页显示内容进行安全设置"],
+                answer: "C",
+                type: "single"
+            },
+            {
+                question: "下列选项中不属于浏览器的是（ ）。",
+                options: ["IE 浏览器", "PDF 阅读器", "FIREFOX 浏览器", "360 浏览器"],
+                answer: "B",
+                type: "single"
+            },
+            {
+                question: "网络中计算机之间的通信是通过（ ）实现的，它们是通信双方必须遵守的约定。",
+                options: ["网卡", "通信协议", "磁盘", "电话交换设备"],
+                answer: "B",
+                type: "single"
+            },
+            {
+                question: "小明在利用 QQ 聊天时，一位陌生人要小明家庭住址与电话号码，以下正确的做法是（ ）。",
+                options: ["尊重别人，立即将自己的电话、家庭住址等信息告诉他", "很不礼貌地回应：'休想！'", "经过一段时间考察，自认为对方没问题，告诉了他", "婉言谢绝了对方的要求"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "制作网站时，网站中的 Image 目录一般是用来存放（ ）文件。",
+                options: ["网页", "图像", "文本", "数据库"],
+                answer: "B",
+                type: "single"
+            },
+            {
+                question: "在网页创建超链接时，可以设置链接的对象有（ ）。",
+                options: ["文字", "按钮", "图片", "以上都是"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "网站的建设通常都遵循一个基本的流程：维护阶段、规划阶段、设计阶段、开发阶段、发布阶段，其次序为（ ）。",
+                options: ["规划------开发------设计------发布------维护", "规划------设计------开发------发布------维护", "设计------开发------发布------规划------维护", "设计------规划------开发------发布------维护"],
+                answer: "B",
+                type: "single"
+            },
+            {
+                question: "网页制作的超文本标记语言是（ ）。",
+                options: ["VB 语言", "HTML 语言", "BASIC 语言", "ASCII"],
+                answer: "B",
+                type: "single"
+            },
+            {
+                question: "下面关于网站制作的说法错误的是（ ）。",
+                options: ["首先要定义站点", "最好提前准备好各种素材", "首页的文件名必须是 index.html", "在制作时，站点一般定义为本地站点"],
+                answer: "C",
+                type: "single"
+            },
+            {
+                question: "小丽打开电子邮箱收件箱，发现有一封邮件有回形针标志，该标志表示（ ）。",
+                options: ["有附件", "紧急邮件", "已回复", "邮件未读"],
+                answer: "A",
+                type: "single"
+            },
+            {
+                question: "小明经常浏览学校网站，下列能使操作更加便捷的是（ ）。",
+                options: ["将学校网址设置为浏览器主页地址", "直接在地址栏中输入学校网址", "通过百度搜索学校网址再打开链接", "将学校网址添加到收藏夹"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "移动互联网已经进入高速发展阶段，以下叙述错误的是（ ）。",
+                options: ["可以预计，无线连接应用越来越广泛，会超过有线连接", "蓝牙是一种短距离无线通讯技术", "移动互联网主要使用了无线宽带接入技术", "一个 AP（无线访问接入点）仅可以支持一个用户接入"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "小米公司新近推出一款产品，名为 '小米盒子'，该产品的主要用途可定位为（ ）。",
+                options: ["智能设备", "装载物品", "时尚饰品", "路径导航"],
+                answer: "A",
+                type: "single"
+            },
+            {
+                question: "提供计算机服务、资源服务和网络管理服务的计算机都被称为（ ）。",
+                options: ["服务器", "网关", "客户机", "交换机"],
+                answer: "A",
+                type: "single"
+            },
+            {
+                question: "在网页创建超级链接时，可以设置链接的对象有（ ）。",
+                options: ["文字", "按钮", "图片", "以上都是"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "'分类汇总' 在哪个选项卡中？（ ）。",
+                options: ["'工具'", "'数据'", "'格式'", "以上都没有"],
+                answer: "B",
+                type: "single"
+            },
+            {
+                question: "Excel 中下列关于删除操作说法正确的是（ ）。",
+                options: ["单元格和工作表均可以删除，并都能恢复", "单元格和工作表均可以删除，单元格删除能恢复，而工作表删除不能恢复", "单元格和工作表均可以删除，单元格删除不能恢复，而工作表删除能恢复", "单元格和工作表均可以删除，并均不能恢复"],
+                answer: "B",
+                type: "single"
+            },
+            {
+                question: "移动 Excel 图表的方法是（ ）。",
+                options: ["将鼠标指针放在图表周围单元格上，按住鼠标左键拖动", "将鼠标指针放在图表控点上，按住鼠标左键拖动", "将鼠标指针放在图表内，按住鼠标左键拖动", "将鼠标指针放在图表内，按住鼠标右键拖动"],
+                answer: "C",
+                type: "single"
+            },
+            {
+                question: "在 Excel 工作表中，行、列坐标所指定的位置称为（ ）。",
+                options: ["工作簿", "区域", "工作表", "单元格地址"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "在 Excel 中下列说法正确的是（ ）。",
+                options: ["直接可以对工作表进行分类汇总", "只要选定区域即可分类汇总", "对工作表中数据分类汇总前需要先排序", "对工作表中数据分类汇总前不需要先排序"],
+                answer: "C",
+                type: "single"
+            },
+            {
+                question: "在 Excel 默认状态下，如果要输入 18 位身份证号码，下列（ ）能正确显示。",
+                options: ["直接输入 18 位数字", "先输入英文半角的单引号，再输入 18 位数字", "先输入 /，再输入数字", "先输入 0，再输入数字"],
+                answer: "B",
+                type: "single"
+            },
+            {
+                question: "在 Excel 默认状态下，在某单元格中输入 1/2，确认后显示的是（ ）。",
+                options: ["1/2", "1 月 2 日", "\"1/2\"", "0.5"],
+                answer: "B",
+                type: "single"
+            },
+            {
+                question: "在 Excel 默认状态下，要在某单元格中显示数值 0.5 时可以输入（ ）。",
+                options: ["10/20", "=10/20", "\"10/20\"", "=\"10/20\""],
+                answer: "B",
+                type: "single"
+            },
+            {
+                question: "考试后老师要用 Excel 对全班同学的成绩进行分析处理，可能用到的操作有（ ）。",
+                options: ["计算总分、平均分", "排序", "筛选", "以上都是"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "在 Excel 中，只显示 '学生成绩表' 中英语成绩大于等于 85 分并且小于 90 分的记录，可使用（ ）。",
+                options: ["查找", "自动筛选", "排序", "全屏显示"],
+                answer: "B",
+                type: "single"
+            },
+            {
+                question: "在 EXCEL 制作表格时要想将几个单元格合并成一个大单元格，所选用的按钮是（ ）。",
+                options: ["A", "B", "C", "D"],
+                answer: "B",
+                type: "single"
+            },
+            {
+                question: "下列关于 Excel 表格信息加工的说法中不正确的是（ ）。",
+                options: ["一个 Excel 工作簿可以有多张工作表", "Average（） 函数可以进行求最小值运算", "饼图适合部分占总体的百分比", "B3 表示第 3 行第 2 列处单元格地址"],
+                answer: "B",
+                type: "single"
+            },
+            {
+                question: "在 Excel 工作表中，B2：E9 区域包含的行数和列数分别是（ ）。",
+                options: ["4、8", "8、4", "3、7", "7、3"],
+                answer: "B",
+                type: "single"
+            },
+            {
+                question: "在 excel2010 中，右击工作表标签，弹出的菜单中的 '重命名' 命令，则下面说法正确的是（ ）。",
+                options: ["只改变工作表的名称", "只改变它的内容", "既改变名称又改变内容", "既不改变名称又不改变内容"],
+                answer: "A",
+                type: "single"
+            },
+            {
+                question: "excel2010 中 '分类汇总' 命令在哪个主选项卡中？（ ）。",
+                options: ["'公式' 主选项卡", "'审阅' 主选项卡", "'数据' 主选项卡", "以上都不对"],
+                answer: "C",
+                type: "single"
+            },
+            {
+                question: "在 Excel 工作表中，每个单元格都有其固定的地址，如 'A5' 表示（ ）。",
+                options: ["'A' 代表 A 列，'5' 代表第 5 行", "'A' 代表 A 行，'5' 代表第 5 列", "'A5' 代表单元格的数据", "以上选项都不正确"],
+                answer: "A",
+                type: "single"
+            },
+            {
+                question: "在 Excel 中，一个工作簿中默认包含（ ）张工作表。",
+                options: ["8", "16", "24", "3"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "在 Excel 中，具有对序列数据自动填充的快速输入功能。在以下各序列数据中，（ ）不能直接利用自动填充快速输入。",
+                options: ["星期一、星期二、星期三 ... ...", "第一类、第二类、第三类 ... ...", "甲、乙、丙、丁 ... ...", "Mon、Tue、Wed ... ..."],
+                answer: "B",
+                type: "single"
+            },
+            {
+                question: "下列预防计算机病毒的措施中，无效的是（ ）。",
+                options: ["保持机器卫生清洁", "不非法使用来路不明的软盘", "将已有信息的软盘加写保护", "修改可执行文件的属性为只读文件"],
+                answer: "A",
+                type: "single"
+            },
+            {
+                question: "李敏在某个不知名网站上下载了一款小游戏，安装这款游戏后，李敏的电脑开始运行缓慢，甚至死机。这一现象表示李敏的电脑很有可能（ ）。",
+                options: ["偶然故障", "硬件配置较低", "感染了病毒", "操作不当"],
+                answer: "C",
+                type: "single"
+            },
+            {
+                question: "计算机病毒的危害性表现在（ ）。",
+                options: ["影响程序的执行，破坏用户数据与程序", "会危害操作计算机人员的健康", "不影响计算机的运行速度", "不影响计算机的运算结果，不必采取措施"],
+                answer: "A",
+                type: "single"
+            },
+            {
+                question: "对于计算机病毒，以下观点正确的是：（ ）。",
+                options: ["计算机病毒非常危险，但比较怕高温", "计算机病毒属于恶意程序", "计算机病毒有人体有较大危害，需要高度警惕", "计算机病毒可以感染计算机的大多数硬件"],
+                answer: "B",
+                type: "single"
+            },
+            {
+                question: "下列程序中对黑客攻击有防御功能的软件是：（ ）。",
+                options: ["驱动程序", "防火墙", "电子表格软件", "磁盘整理工具"],
+                answer: "B",
+                type: "single"
+            },
+            {
+                question: "计算机病毒一般是通过（ ）传播的。",
+                options: ["生物病毒", "磁盘和键盘", "网络和磁盘", "相邻计算机"],
+                answer: "C",
+                type: "single"
+            },
+            {
+                question: "计算机病毒可以通过多种途径感染你的计算机，并迅速蔓延、防不胜防，这属于计算机病毒的：（ ）。",
+                options: ["诡异性", "传染性", "隐蔽性", "可行性"],
+                answer: "B",
+                type: "single"
+            },
+            {
+                question: "感染计算机病毒后，用常规方法通常无法找到该病毒，这属于计算机病毒的：（ ）。",
+                options: ["隐蔽性", "破坏性", "可执行性", "变化性"],
+                answer: "A",
+                type: "single"
+            },
+            {
+                question: "以下观点哪个是正确的：（ ）。",
+                options: ["杀毒软件可以杀掉所有的病毒", "安装杀毒软件后，计算机不会中毒", "杀毒软件是 '傻瓜' 软件，不需要做任何设置", "杀毒软件需要定期升级更新"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "计算机病毒感染后，会对计算机系统造成各种各样的损害，这属于计算机病毒的：（ ）。",
+                options: ["独立性", "无知性", "潜伏性", "破坏性"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "QQ 是目前最常用的即时通讯工具，在申请了 QQ 时，为了防止被恶意盗号，下列哪种密码编写的方式最安全（ ）。",
+                options: ["字母、数字、标点的组合", "数字", "字母", "字母和数字的组合"],
+                answer: "A",
+                type: "single"
+            },
+            {
+                question: "下列说法不正确的是（ ）。",
+                options: ["不向他人随意透露自己的个人信息", "不在网站上随意登记自己信息", "给他人拍自己的身份证照片", "不向他人随意透露自己的密码"],
+                answer: "C",
+                type: "single"
+            },
+            {
+                question: "信息安全是信息网络的硬件、软件及系统中的（ ）受到保护，不因偶然或恶意的原因而受到破坏、更改或泄露。",
+                options: ["用户", "管理制度", "数据", "设备"],
+                answer: "C",
+                type: "single"
+            },
+            {
+                question: "当用户收到了一封可疑的电子邮件，要求用户提供银行账户及密码，这是属于何种攻击手段？（ ）。",
+                options: ["缓存溢出攻击", "钓鱼攻击", "暗门攻击", "DDOS 攻击"],
+                answer: "B",
+                type: "single"
+            },
+            {
+                question: "为了防御网络监听，最常用的方法是：（ ）。",
+                options: ["采用物理传输（非网络）", "信息加密", "无线网", "使用专线传输"],
+                answer: "B",
+                type: "single"
+            },
+            {
+                question: "小明在电脑爱好者论坛上提出有关信息安全的观点，其中错误的是（ ）。",
+                options: ["安装最新版 QQ 软件有助于防护密码被盗", "在网站上下载软件，使用提供的破解工具不会有问题", "使用 360 杀毒软件是一个免费的杀毒软件", "在淘宝网上购物使用支付宝比直接汇款安全"],
+                answer: "B",
+                type: "single"
+            },
+            {
+                question: "同学们在上网过程中，下列行为恰当的是（ ）。",
+                options: ["在个人微信朋友圈中发布他人的隐私信息", "在 QQ 群中组织成员谩骂、人肉他人", "在论坛中讨论破解网银账户密码的方法", "在网络上共享自己制作的旅游风光视频"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "从信息安全角度看，以下选项中邮箱密码更安全的是：（ ）。",
+                options: ["12345678", "password", "px965m3H", "aaaaaa"],
+                answer: "C",
+                type: "single"
+            },
+            {
+                question: "现在信息安全越来越被人们所关注，下列说法正确的是（ ）。",
+                options: ["保持个人计算机的卫生，能有效防止计算机病毒的入侵", "在计算机和手机只要安装了杀毒软件，就不会感染计算机病毒", "手机系统是安全的，手机 APP 可以随意下载", "及时安装系统软件的补丁程序，可以更好的防止病毒入侵"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "下面网络行为中，正确的是（ ）。",
+                options: ["某同学为了吸引眼球，到论坛上随意发布虚假内容的文章", "从网络中下载作文，交给老师参加作文竞赛", "将自己邮箱中的垃圾邮件发给别人", "通过微信朋友圈或 QQ 群发布真实的求助信息"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "以下关于信息安全的叙述中，不正确的是（ ）。",
+                options: ["信息安全的目标是保证信息不受到病毒感染", "网络环境下信息系统的安全性比独立的计算机系统更脆弱", "信息的可靠性是系统安全的最基本要求之一", "数据备份是一种安全策略"],
+                answer: "A",
+                type: "single"
+            },
+            {
+                question: "photoshop 是（ ）软件。",
+                options: ["文字处理软件", "电子表格软件", "演示文稿制作软件", "图像编辑处理软件"],
+                answer: "D",
+                type: "single"
+            },
+            {
+                question: "Windows 中回收站的功能的是 （ ）。",
+                options: ["恢复删除文件", "清空回收站", "复制", "U 盘格式化"],
+                answer: "AB",
+                type: "multiple"
+            },
+            {
+                question: "下面软件（ ）是应用软件。",
+                options: ["Windows", "Flash", "Photoshop", "Dreamweaver"],
+                answer: "BCD",
+                type: "multiple"
+            },
+            {
+                question: "在 WindowsXP 资源管理器中选定一个文件夹后，下列操作中能删除该文件夹的是( )。",
+                options: ["在键盘上按 Del 键", "用鼠标右键单击该文件夹，打开快捷菜单，然后选择\"删除\"命令", "在文件菜单中选择\"删除\"命令", "用鼠标左键双击该文件夹"],
+                answer: "ABC",
+                type: "multiple"
+            },
+            {
+                question: "使用 Windows 操作系统时，下列说法不正确的是（ ）。",
+                options: ["不能同时打开多个窗口", "可以同时打开多个窗口", "不能同时执行多种任务", "可以在断电后保存内存中的信息"],
+                answer: "ACD",
+                type: "multiple"
+            },
+            {
+                question: "通常关闭 windows 程序的方法有( )。",
+                options: ["Ctrl+F4", "Alt+F4", "单击窗口最右边的关闭按纽", "双击窗口标题栏最左边的图标"],
+                answer: "BCD",
+                type: "multiple"
+            },
+            {
+                question: "属于输入设备的是（ ）。",
+                options: ["键盘", "鼠标", "摄像头", "打印机"],
+                answer: "ABC",
+                type: "multiple"
+            },
+            {
+                question: "下面那些说法是正确的( )。",
+                options: ["回收站实际上是用来存放被用户删除掉的文件的地方，这些文件在需要时还可以恢复", "在删除的同时按住 Shift 键，被删除的文件是不保存在\"回收站\"里的", "回收站的图标，根据回收站里是否有被删除的文件而不同", "回收站的容量是可以由用户自己指定的"],
+                answer: "ABCD",
+                type: "multiple"
+            },
+            {
+                question: "以下哪些操作是通过单击鼠标左键完成的（ ）。",
+                options: ["启动桌面的应用程序", "从\"开始\"→\"菜单\"中启动某个应用程序", "选对话框中的某些按钮", "执行工具栏中的某些工具"],
+                answer: "BCD",
+                type: "multiple"
+            },
+            {
+                question: "在 WINDOW 中，有两个对系统资源进行管理的程序组，它们是（ ）。",
+                options: ["我的电脑", "资源管理器", "回收站", "我的文档"],
+                answer: "AB",
+                type: "multiple"
+            },
+            {
+                question: "执行应用程序的方法有（ ）。",
+                options: ["双击桌面图标表示的应用程序", "在文件菜单中，打开文本文件执行", "在开始按钮中找到应用程序菜单，单击执行", "执行开始菜单中的运行命令，输入应用程序名执行"],
+                answer: "ACD",
+                type: "multiple"
+            },
+            {
+                question: "下列有关文件夹的叙述中，正确的有( )",
+                options: ["文件夹一经建立就不能删除", "文件夹可根据需要来建立", "文件夹是可以移动的", "文件夹名称是可以改变的"],
+                answer: "BCD",
+                type: "multiple"
+            },
+            {
+                question: "云盘是互联网云技术的产物，它通过互联网为企业和个人提供信息的（ ）",
+                options: ["存储", "读取", "下载", "编辑"],
+                answer: "ABC",
+                type: "multiple"
+            },
+            {
+                question: "云盘是互联网存储工具，它是互联网云技术的产物，具有的特点是（ ）。",
+                options: ["安全保密性好", "存储容量大", "好友可以共享", "信息传递速度快"],
+                answer: "ABCD",
+                type: "multiple"
+            },
+            {
+                question: "Windows 对文件和文件夹的命名规定正确的是（ ）。",
+                options: ["文件名或文件夹名最多可由 255 个字符和数字组成", "文件名中可有空格但不能有？、*、和：", "同一文件夹中的文件或子文件夹能同名", "区分英文大小写"],
+                answer: "AB",
+                type: "multiple"
+            },
+            {
+                question: "在默认情况下，资源管理器的排序方式可以是（ ）。",
+                options: ["按名称", "按类型", "按大小", "按日期"],
+                answer: "ABCD",
+                type: "multiple"
+            },
+            {
+                question: "大家都熟知的微信，其基本服务功能有（ ）",
+                options: ["聊天", "添加好友", "实时对讲机", "支付消费"],
+                answer: "ABCD",
+                type: "multiple"
+            },
+            {
+                question: "计算机时钟用于记录创建或修改计算机中文件的时间。以下说法正确的是（ ）",
+                options: ["计算机时钟无法更改", "计算机时钟可以更改", "计算机时钟更改后可以恢复", "计算机时钟可以自动定期同步"],
+                answer: "BCD",
+                type: "multiple"
+            },
+            {
+                question: "要对图表中数据值进行修改，可采取的办法是（ ）。",
+                options: ["在数据源中进行修改", "在图表中直接进行修改", "一经生成图表，则数据不能再被修改", "删除图表，修改数据后再重新生成图表"],
+                answer: "ABD",
+                type: "multiple"
+            },
+            {
+                question: "以下关于 Excel 的叙述中错误的是（ ）。",
+                options: ["Excel 将工作簿的每一张工作表分别作为一个文件来保存", "Excel 允许同时打开多个工作簿文件进行处理", "Excel 的图表必须与生成该图表的有关数据处于同一张工作表上", "Excel 工作表的名称由文件名决定"],
+                answer: "ACD",
+                type: "multiple"
+            },
+            {
+                question: "以下哪些是 Excel 中常见的函数（ ）。",
+                options: ["AVERAGE", "SUM", "MAX", "MIN"],
+                answer: "ABCD",
+                type: "multiple"
+            },
+            {
+                question: "在 Excel 中，数据的排序方式有( )。",
+                options: ["按升序排列", "按降序排列", "按某单元格排序", "求和排序"],
+                answer: "AB",
+                type: "multiple"
+            },
+            {
+                question: "在 Excel 中，下列公式正确的是( )。",
+                options: ["\"A1+5\"", "\"=A1+B2*40%\"", "\"=SUM(A1:B6)\"", "\"=B3/4\""],
+                answer: "BCD",
+                type: "multiple"
+            },
+            {
+                question: "Excel 对表格的修饰可以（ ）。",
+                options: ["给表格加上颜色", "设置表格的边框", "改变行高", "改变列宽"],
+                answer: "ABCD",
+                type: "multiple"
+            },
+            {
+                question: "Excel 中，利用\"开始\"选项卡中的\"填充\"命令可以（ ）。",
+                options: ["按行填充或按列填充", "填充相同数据或序列", "填充日期序列可以按月或按年递增", "设置填充序列的终止值"],
+                answer: "ABCD",
+                type: "multiple"
+            },
+            {
+                question: "在 Excel 中，我们可以对数据进行（ ）等操作。",
+                options: ["排序", "分类汇总", "筛选", "删除"],
+                answer: "ABCD",
+                type: "multiple"
+            },
+            {
+                question: "在 Excel 中输入了一组数据，现选择了其中一部分(连续的一个矩形区域)后单击复制按钮，下列说法正确的有( )",
+                options: ["可以粘贴到另一个工作表中", "可以粘贴到 Word 文档中，粘贴后是一个表格", "可以粘贴到 Word 文档中，粘贴后不是一个表格，是一组连续的数据，中间没有任何分隔符", "不能粘贴到 Word 文档中"],
+                answer: "AB",
+                type: "multiple"
+            },
+            {
+                question: "在 Excel 中，下列（ ）说法能完成列宽的改变。",
+                options: ["双击列标右边的边界", "拖动列标右边界来设置所需列宽", "选取相应的列，将鼠标指向\"格式\"菜单中的\"列\"子菜单，然后选择列宽命令，并输入所需的宽度", "执行\"格式→单元格\"菜单命令,可以改变列宽"],
+                answer: "BC",
+                type: "multiple"
+            },
+            {
+                question: "RGB 格式的文件包含（ ）颜色通道。",
+                options: ["红色", "黄色", "蓝色", "绿色"],
+                answer: "ACD",
+                type: "multiple"
+            },
+            {
+                question: "下列关于 Photoshop 打开文件的操作，哪个是正确的？（ ）",
+                options: ["选择\"文件------打开\"命令，在弹出的对话框中选择要打开的文件", "如果图像是 Photoshop 软件创建的，直接双击图像图标", "将图像图标拖放到 Photoshop 软件图标上", "打开文件后，图像可以自动变大"],
+                answer: "ABC",
+                type: "multiple"
+            },
+            {
+                question: "下列文件格式中，哪些是图像文件的扩展名( )",
+                options: [".TXT", ".JPG", ".GIF", ".BMP"],
+                answer: "BCD",
+                type: "multiple"
+            },
+            {
+                question: "在 Photoshop 的套索工具中包含哪几种套索类型（ ）。",
+                options: ["自由套索工具", "多边形套索工具", "矩形套索工具", "磁性套索工具"],
+                answer: "ABD",
+                type: "multiple"
+            },
+            {
+                question: "在 Photoshop 中，橡皮擦工具选项栏中有哪些模式（ ）。",
+                options: ["画笔", "铅笔", "直线", "块"],
+                answer: "ABD",
+                type: "multiple"
+            },
+            {
+                question: "在 Photoshop 中，以下说法正确的是（ ）。",
+                options: ["当 RGB 色彩值都是 0 时，该部分是白色", "当 RGB 色彩值都是 0 时，该部分是黑色", "当 RGB 色彩值都是 255 时，该部分是白色", "当 RGB 色彩值都是 255 时，该部分是黑色"],
+                answer: "BC",
+                type: "multiple"
+            },
+            {
+                question: "在 Photoshop 中，属于选取工具的是（ ）。",
+                options: ["磁性套索工具", "自由套索工具", "喷枪工具", "魔棒工具"],
+                answer: "ABD",
+                type: "multiple"
+            },
+            {
+                question: "在 Photoshop 中，我们可以利用（ ）来选取图像。",
+                options: ["仿制图章工具", "魔棒工具", "磁性套索工具", "矩形选择工具"],
+                answer: "BCD",
+                type: "multiple"
+            },
+            {
+                question: "在 Photoshop 中，与图像属性相关的设置选项有（ ）。",
+                options: ["亮度", "对比度", "分辨率", "色相"],
+                answer: "ABCD",
+                type: "multiple"
+            },
+            {
+                question: "在 Photoshop 中，下面哪些选项属于规则选择工具（ ）",
+                options: ["矩形选择工具", "椭圆形选择工具", "魔术棒工具", "套索工具"],
+                answer: "AB",
+                type: "multiple"
+            },
+            {
+                question: "关于图层，下列说法中正确的有( )",
+                options: ["图层是图像合成中经常使用的一种技术", "图层相当于一个透明的容器，用来放置图像元素", "为了方便处理，通常每个图层放一个图像元素或一组类似的图像元素", "Photoshop 和 Windows 自带的画图软件都具有图层的功能"],
+                answer: "ABC",
+                type: "multiple"
+            },
+            {
+                question: "Internet 提供的服务包括（ ）。",
+                options: ["远程登录", "信息查寻服务", "电子邮件", "文件传输"],
+                answer: "ABCD",
+                type: "multiple"
+            },
+            {
+                question: "关于收发电子邮件，以下叙述正确的是（ ）。",
+                options: ["必须在固定的计算机上收/发邮件", "向对方发送邮件时，不要求对方开机", "一次只能发给一个接收者", "发送邮件需填写对方邮件地址"],
+                answer: "BD",
+                type: "multiple"
+            },
+            {
+                question: "利用电子邮件，我们可以做到（ ）。",
+                options: ["一信多发", "邮寄多媒体文件", "邮寄包裹", "邮寄钞票"],
+                answer: "AB",
+                type: "multiple"
+            },
+            {
+                question: "青少年应该具备的网络素养包括（ ）。",
+                options: ["了解电脑和网络的基本知识", "上网成瘾", "发现和处理信息的能力", "具有创造和传播信息的能力"],
+                answer: "ACD",
+                type: "multiple"
+            },
+            {
+                question: "我们想用 IE 浏览某网站时,可以( )。",
+                options: ["在地址栏中输入该网站的网址", "点菜单项\"文件\"的\"打开\"", "点\"收藏\"钮,点击该网站", "打电话给该网站的网管"],
+                answer: "ABC",
+                type: "multiple"
+            },
+            {
+                question: "下列属于即时通讯软件的有（ ）。",
+                options: ["QQ", "网络电话", "雅虎通", "MSN Messenger"],
+                answer: "ABCD",
+                type: "multiple"
+            },
+            {
+                question: "在 Internet Explorer 浏览器中，下列关于\"主页设置\"的描述正确的是（ ）。",
+                options: ["大多数网页可设置主页", "只能将网站的首页设置为主页", "可以使用\"空白页\"作为主页", "单击\"主页\"按钮，就可以打开所设置的主页"],
+                answer: "ACD",
+                type: "multiple"
+            },
+            {
+                question: "在 Internet 上我们可以做（ ）。",
+                options: ["浏览信息", "收发邮件", "下载资料", "聊天"],
+                answer: "ABCD",
+                type: "multiple"
+            },
+            {
+                question: "某学生想给他的同学发一封电子邮件，他必须知道（ ）。",
+                options: ["他同学的电子邮箱地址", "他自己的电子邮箱地址", "他同学家的门牌号码", "他同学的计算机是否开机"],
+                answer: "AB",
+                type: "multiple"
+            },
+            {
+                question: "通过计算机网络不可以共享的是（ ）",
+                options: ["打印机", "键盘", "显示器", "鼠标"],
+                answer: "BCD",
+                type: "multiple"
+            },
+            {
+                question: "在使用浏览器浏览网页的以下操作中，能浏览刚才访问过的页面的操作有( )",
+                options: ["打开地址栏的下拉列表，然后选择一个页面", "单击工具栏上的\"历史\"按钮，然后选择一个页面", "单击工具栏上的\"后退\"按钮", "在\"查看\"菜单中选择\"刷新\"命令"],
+                answer: "ABC",
+                type: "multiple"
+            },
+            {
+                question: "浏览器的收藏夹常用来管理网络信息，对它的认识正确的是( )",
+                options: ["收藏夹可以象资源管理器一样进行复制、剪切和粘贴操作", "正常情况下，Windows 安装完毕，在收藏夹下有一个默认的\"链接\"文件夹", "收藏夹可以备份，在系统崩溃重新安装时可以把备份的收藏夹导入", "收藏夹可以自动添加我们浏览过的网站"],
+                answer: "ABC",
+                type: "multiple"
+            },
+            {
+                question: "互联网的隐蔽性使得网络欺骗、诈骗及盗窃的案件屡见报端，为了保护好个人隐私，需要做到( )",
+                options: ["在电脑中安装防火墙和杀毒软件并及时升级", "要传送敏感数据时，为了不泄密，要选择加密发送", "在公共场所上网时要及时清除上网记录", "对网友要真诚相待,没必要隐藏个人真实信息"],
+                answer: "ABC",
+                type: "multiple"
+            },
+            {
+                question: "计算机网络按拓扑结构来划分，可以分为（ ）。",
+                options: ["星形网", "总线形网", "环形网", "直线形网"],
+                answer: "ABC",
+                type: "multiple"
+            },
+            {
+                question: "下面是关于数据透视表的几种说法，其中错误的说法是（ ）。",
+                options: ["数据透视表与图表类似，它会随着数据中数据的变化，而自动更新", "用户不可以在数据透视表上直接更改数据", "数据透视表中的数据只能以求和的方式计算", "如果数据清单中数据被改变，可以用\"数据透视表\"工具栏上\"更新数据\"工具自动更新数据表数据"],
+                answer: "CD",
+                type: "multiple"
+            },
+            {
+                question: "在 Windows 中，能在任务栏内进行的操作是（ ）。",
+                options: ["设置系统日期和时间", "排列桌面图标", "切换窗口", "启动\"开始\"菜单"],
+                answer: "ACD",
+                type: "multiple"
+            },
+            {
+                question: "在 Photoshop 中,通道分为（ ）两大类。",
+                options: ["色彩通道", "专色通道", "Alpha 通道", "复合通道"],
+                answer: "AC",
+                type: "multiple"
+            },
+            {
+                question: "家庭因特网常用的接入方式有（ ）。",
+                options: ["拨号上网", "专线接入", "宽带接入", "光纤入户"],
+                answer: "ABC",
+                type: "multiple"
+            },
+            {
+                question: "在 Photoshop 中，与图像属性相关的设置选项有（ ）。",
+                options: ["亮度", "对比度", "分辨率", "色相"],
+                answer: "ABCD",
+                type: "multiple"
+            },
+            {
+                question: "有关 Excel 图表，下面表述错误的是（ ）。",
+                options: ["要往图表中增加一列，必须重新建立图表", "修改了图表数据源单元格的数据，图标会自动跟着刷新", "要修改图表的类型，必须重新建立图表", "修改了图表坐标轴的字体、字号，坐标轴标题就自动跟着变化"],
+                answer: "ACD",
+                type: "multiple"
+            },
+            {
+                question: "在 Photoshop 中,下列（ ）方法可以建立新图层。",
+                options: ["双击图层调板的空白处", "单击图层调板下方的按钮", "使用鼠标将当前图像拖动到另一张图像上", "使用文字工具在图像上添加文字"],
+                answer: "BCD",
+                type: "multiple"
+            },
+            {
+                question: "一幅图像在 Photoshop 中打开后，共进行了 20 步操作，现需要将其中的一个局部（图中已制作出该局部的选择区域）恢复到第 10 步时的操作结果，可使用下列( )工具或命令。",
+                options: ["历史记录画笔", "橡皮擦工具", "\"编辑--填充\"", "\"编辑--还原\""],
+                answer: "AD",
+                type: "multiple"
+            },
+            {
+                question: "关于分类汇总，叙述正确的是（ ）。",
+                options: ["分类汇总前首先应按分类字段值队记录排序", "分类汇总只能按一个字段分类", "只能对数值型字段分类", "汇总方式只能求和"],
+                answer: "AB",
+                type: "multiple"
+            },
+            {
+                question: "复制文件完成后，下列叙述错误的是（ ）。",
+                options: ["原文件消失，目标文件出现", "原文件仍在，目标文件出现", "原文件消失，目标文件不存在", "原文件仍在，目标文件不存在"],
+                answer: "ACD",
+                type: "multiple"
+            },
+            {
+                question: "求工作表中 A1 到 A6 单元格中数据的和可用（ ）。",
+                options: ["=A1+A2+A3+A4+A5+A6", "=SUM（A1：A6）", "=（A1+A2+A3+A4+A5+A6）", "=SUM（A1，A6）"],
+                answer: "AB",
+                type: "multiple"
+            },
+            {
+                question: "Excel 可创建（ ）图表。",
+                options: ["二维图表", "三维图表", "饼图", "雷达图"],
+                answer: "ABCD",
+                type: "multiple"
+            },
+            {
+                question: "所谓移动学习我们可以借助的工具有（ ）",
+                options: ["平板电脑", "手机", "铅笔", "投影仪"],
+                answer: "AB",
+                type: "multiple"
+            },
+            {
+                question: "下面那哪些是属于信息技术应用的例子（ ）",
+                options: ["三维动画游戏", "网上购物", "个性化手机", "语音输入"],
+                answer: "ABCD",
+                type: "multiple"
+            },
+            {
+                question: "下列选项中，影响系统稳定运行的原因主要有（ ）。",
+                options: ["未安装系统补丁", "未安装杀毒软件", "被强行安装了\"流氓\"软件", "硬盘内的文件存储太多"],
+                answer: "ABC",
+                type: "multiple"
+            },
+            {
+                question: "下面关于工作表说法正确的有（ ）。",
+                options: ["工作表也称电子表格，是 Excel 用来存储和处理数据的地方", "新建一个工作簿时，Excel 应用程序窗口显示的是它的第一个工作表", "列标题用字母 A，B，...，Z，AA，AB，，，，IV 表示，共 256 列", "行标题用数字 1，2，...，65536 表示，共 65536 行"],
+                answer: "ABCD",
+                type: "multiple"
+            },
+            {
+                question: "Word2010 具有分栏功能，下列关于分栏的说法中不正确的是（ ）",
+                options: ["最多可以设 4 栏", "各栏的宽度必须相同", "各栏的宽度可以不同", "各栏不同的间距是固定的"],
+                answer: "ABD",
+                type: "multiple"
+            },
+            {
+                question: "下列关于 Excel2010 的\"排序\"功能，说法正确的有（ ）",
+                options: ["可以按行排序", "可以按列排序", "最多允许有三个排序关键字", "可以自定义列排序"],
+                answer: "ABD",
+                type: "multiple"
+            },
+            {
+                question: "在 PowerPoint2010 中可插入的对象有( )。",
+                options: ["WPS 文档", "WIN98", "WORD 文档", "视频片段"],
+                answer: "ACD",
+                type: "multiple"
+            },
+            {
+                question: "在 Excel 中，下列说法错误的是（ ）。",
+                options: ["直接可以对工作表进行分类汇总", "只要选定区域即可分类汇总", "对工作表中数据分类汇总前需要先排序", "对工作表中数据分类汇总前不需要先排序"],
+                answer: "ABD",
+                type: "multiple"
+            },
+            {
+                question: "以下的一些网络行为错误的是（ ）",
+                options: ["在网上言论可以肆无忌惮，想说什么就说什么。", "上网的时候可以利用网络工具攻击别人的网站、计算机等。", "使用微信、微博发布一些虚假信息没人知道谁发的，没关系。", "利用网络可以销售假冒、违禁品。"],
+                answer: "ABCD",
+                type: "multiple"
+            },
+            {
+                question: "互联网信息服务提供者不得制作、复制、发布、传播含有下列内容的信息（ ）：",
+                options: ["反对所确定的基本原则的", "危害国家安全，泄露国家秘密，颠覆国家政权，破坏国家统一的；", "损害国家荣誉和利益的；", "煽动民族仇恨、民族歧视，破坏民族团结的；"],
+                answer: "ABCD",
+                type: "multiple"
+            },
+            {
+                question: "在市场上比较流行，而又能够代表未来发展方向的安全产品有以下（ ）类：",
+                options: ["用户身份认证：包括：静态密码、动态密码（短信密码、动态口令牌、手机令牌）、USB KEY、IC 卡、数字证书、指纹虹膜等。", "防火墙：防火墙在某种意义上可以说是一种访问控制产品。它在内部网络与不安全的外部网络之间设置障碍，阻止外界对内部资源的非法访问，防止内部对外部的不安全访问。", "安全路由器：由于 WAN 连接需要专用的路由器设备，因而可通过路由器来控制网络传输。通常采用访问控制列表技术来控制网络信息流。", "虚拟专用网(VPN)：虚拟专用网（VPN）是在公共数据网络上，通过采用数据加密技术和访问控制技术，实现两个或多个可信内部网之间的互联。"],
+                answer: "ABCD",
+                type: "multiple"
+            },
+            {
+                question: "网络对青少年的危害 （ ）",
+                options: ["意志毅力的消磨和自控能力的下降", "对周围人事的不信任和紧张的人际关系", "网络安全和网络犯罪现象", "价值观念的模糊和道德观念的淡化"],
+                answer: "ABCD",
+                type: "multiple"
+            },
+            {
+                question: "网络博客系统已经成为许多人存储信息资源的工具，在博客上实现的功能有（ ）。",
+                options: ["上传学习资源", "发布学习内容", "设置日志为保密", "不能删除日志"],
+                answer: "ABC",
+                type: "multiple"
+            },
+            {
+                question: "小明想在网上购买一件昂贵的数码相机，不恰当的做法有（ ）。",
+                options: ["先让对方寄货，收到货后不再汇款", "独自一人带现金到对方指定地点取货", "先将部分款汇到对方指定的账户上，收到货后再汇去余下的款", "先将款汇到经国家有关部门认证的、信誉良好的中介机构，收到货后再通知中介机构把款汇给对方"],
+                answer: "ABC",
+                type: "multiple"
+            },
+            {
+                question: "以下属于网络存储工具的是（ ）",
+                options: ["百度云盘", "360 云盘", "金山快盘", "U 盘"],
+                answer: "ABC",
+                type: "multiple"
+            },
+            {
+                question: "使用 Windows 7 的备份功能所创建的系统镜像可以保存在( )上。",
+                options: ["内存", "硬盘", "光盘", "网络"],
+                answer: "BCD",
+                type: "multiple"
+            },
+            {
+                question: "1946年，世界上第一台电子计算机（埃尼阿克）在美国宾夕法尼亚大学诞生。",
+                answer: "A",
+                type: "judgment"
+            },
+            {
+                question: "计算机软件一般包括系统软件和编辑软件。",
+                answer: "B",
+                type: "judgment"
+            },
+            {
+                question: "开机的正确顺序是先开主机上的电源开关，再打开显示器。",
+                answer: "B",
+                type: "judgment"
+            },
+            {
+                question: "可以通过Capslock键输入上档字符，如先按下Capslock键再按数字2，即可输入@字符。",
+                answer: "B",
+                type: "judgment"
+            },
+            {
+                question: "鼠标的五种基本操作包括：指向、单击、双击、拖动、右击。",
+                answer: "A",
+                type: "judgment"
+            },
+            {
+                question: "CPU的中文名字叫“中央处理器”，它是计算机的核心。",
+                answer: "A",
+                type: "judgment"
+            },
+            {
+                question: "打印机、显示器、扫描仪都属于输出设备。",
+                answer: "B",
+                type: "judgment"
+            },
+            {
+                question: "计算机能够直接识别的一种计数制是二进制。",
+                answer: "A",
+                type: "judgment"
+            },
+            {
+                question: "硬盘属于内存储器。",
+                answer: "B",
+                type: "judgment"
+            },
+            {
+                question: "计算机中的中央处理器主要由运算器和存储器组成。",
+                answer: "B",
+                type: "judgment"
+            },
+            {
+                question: "触摸屏既是输入设备又是输出设备。",
+                answer: "A",
+                type: "judgment"
+            },
+            {
+                question: "微信只能发送文字，不能发图片和语音。",
+                answer: "B",
+                type: "judgment"
+            },
+            {
+                question: "随着技术发展，云盘是现代计算机主机里新增加的一个存储设备。",
+                answer: "B",
+                type: "judgment"
+            },
+            {
+                question: "微信属于一种即时通讯工具。",
+                answer: "A",
+                type: "judgment"
+            },
+            {
+                question: "Windows中默认中英文切换使用的是Ctrl+空格键。",
+                answer: "A",
+                type: "judgment"
+            },
+            {
+                question: "程序和数据都是以文件夹的形式存放在磁盘上。",
+                answer: "B",
+                type: "judgment"
+            },
+            {
+                question: "回收站是硬盘上的特殊文件夹，大小是可以调整的。",
+                answer: "A",
+                type: "judgment"
+            },
+            {
+                question: "快捷键(Ctrl)+(Alt)+(Del)表示的意思是冷启动。",
+                answer: "B",
+                type: "judgment"
+            },
+            {
+                question: "快捷键alt+F4是关闭或退出当前运行的应用程序的命令。",
+                answer: "A",
+                type: "judgment"
+            },
+            {
+                question: "任何人、任何地方、任何时期都不能未经许可而使用有知识产权的软件。",
+                answer: "A",
+                type: "judgment"
+            },
+            {
+                question: "任务栏必须显示在桌面上，不可以隐藏起来。",
+                answer: "B",
+                type: "judgment"
+            },
+            {
+                question: "用“开始”菜单中的“查找”命令，能查找文件或文件夹。",
+                answer: "A",
+                type: "judgment"
+            },
+            {
+                question: "我们可以通过资源管理器查找自己想要的程序和文件。",
+                answer: "A",
+                type: "judgment"
+            },
+            {
+                question: "一般Windows的窗口都会同时出现最大化、最小化、还原、关闭的按钮。",
+                answer: "B",
+                type: "judgment"
+            },
+            {
+                question: "在Windows中，剪贴板是软盘上的一块区域。",
+                answer: "B",
+                type: "judgment"
+            },
+            {
+                question: "Word是文字处理系统，只能处理汉字。",
+                answer: "B",
+                type: "judgment"
+            },
+            {
+                question: "Word在页面视图方式中能够看到图文框和使用绘图工具栏的工具绘制图形。",
+                answer: "A",
+                type: "judgment"
+            },
+            {
+                question: "Word中，阿拉伯字号越大，表示字符越小；中文字号越大，表示字符越大。",
+                answer: "B",
+                type: "judgment"
+            },
+            {
+                question: "对文字进行修饰必须先选定相应的文字。",
+                answer: "A",
+                type: "judgment"
+            },
+            {
+                question: "在WODR中，处理艺术字体、数学公式等都不可以像处理图片一样把他们加入图文框，放到文档的任一位置。",
+                answer: "B",
+                type: "judgment"
+            },
+            {
+                question: "在Word 2010中，不可以打开Word 97所生成的文档。",
+                answer: "B",
+                type: "judgment"
+            },
+            {
+                question: "Word中的表格，不可以用公式进行自动计算。",
+                answer: "B",
+                type: "judgment"
+            },
+            {
+                question: "在Word中的查找和替换对话框中的替换和全部替换的作用相同。",
+                answer: "B",
+                type: "judgment"
+            },
+            {
+                question: "关闭文档窗口不会关闭Word主窗口。",
+                answer: "A",
+                type: "judgment"
+            },
+            {
+                question: "在Word文档中一个段落可以使用多种汉字字体和修饰。",
+                answer: "A",
+                type: "judgment"
+            },
+            {
+                question: "Excel单元格中数值型数据较大，有时会出现若干个“#”符号，此时只要调列宽就能显示数据。",
+                answer: "A",
+                type: "judgment"
+            },
+            {
+                question: "工作表标签栏位于工作簿窗口的下端，用于显示工作表名。",
+                answer: "A",
+                type: "judgment"
+            },
+            {
+                question: "工作表是构成单元格的最小单位。",
+                answer: "B",
+                type: "judgment"
+            },
+            {
+                question: "如果E2单元格中的数据是85，F2单元格中的数据是91，则在G2单元格中输入=AVERAGE(E2:F2)后，在G2单元格中得到的数据是88。",
+                answer: "A",
+                type: "judgment"
+            },
+            {
+                question: "一个工作簿，无论包括多少个工作表，各表是否有数据，它都将作为一个工作簿文件整体进行存储，而不是只保存有数据的工作表。",
+                answer: "A",
+                type: "judgment"
+            },
+            {
+                question: "在Excel中，汇总方式只能是求和。",
+                answer: "B",
+                type: "judgment"
+            },
+            {
+                question: "在Excel中，单元格数据填充的方向只有向上填充和向下填充两种。",
+                answer: "B",
+                type: "judgment"
+            },
+            {
+                question: "在Excel操作窗口中，单击工具栏中“合并居中”按钮，各单元格中的数据保存不变。",
+                answer: "A",
+                type: "judgment"
+            },
+            {
+                question: "EXCEL在默认情况下，输入的数字是数值型数据，靠右对齐。",
+                answer: "A",
+                type: "judgment"
+            },
+            {
+                question: "在Excel中，“清除”命令和“删除”命令的功能完全相同。",
+                answer: "B",
+                type: "judgment"
+            },
+            {
+                question: "PowerPoint中，“插入”主选项卡“影片和声音”中的“文件中的声音”可以直接插入MP3音乐。",
+                answer: "A",
+                type: "judgment"
+            },
+            {
+                question: "PowerPoint中裁剪图片是指保存图片的大小不变，而将不希望显示的部分隐藏起来。",
+                answer: "A",
+                type: "judgment"
+            },
+            {
+                question: "PowerPoint中当用户制作完成一份演示文稿后，如果以HTML格式存储，则不可以在Internet上进行发布。",
+                answer: "B",
+                type: "judgment"
+            },
+            {
+                question: "PowerPoint演示文稿的扩展名为.ppt。",
+                answer: "A",
+                type: "judgment"
+            },
+            {
+                question: "PowerPoint中如果终止幻灯片的放映，可直接按Esc键。",
+                answer: "A",
+                type: "judgment"
+            },
+            {
+                question: "PowerPoint中，不应用设计模板，将无法设计幻灯片。",
+                answer: "B",
+                type: "judgment"
+            },
+            {
+                question: "IE浏览器中的主页不能更改。",
+                answer: "B",
+                type: "judgment"
+            },
+            {
+                question: "网络资源是共享的，可以随便下载，没有版权问题。",
+                answer: "B",
+                type: "judgment"
+            },
+            {
+                question: "我们可用Internet Explorer中收藏夹的功能将当前网页的内容保存到本地磁盘。",
+                answer: "B",
+                type: "judgment"
+            },
+            {
+                question: "在Internet上，BBS表示的中文含义是电子公告板。",
+                answer: "A",
+                type: "judgment"
+            },
+            {
+                question: "计算机网络按通信距离分为广域网、城域网、局域网。",
+                answer: "A",
+                type: "judgment"
+            },
+            {
+                question: "网页上有超链接的地方，鼠标指针会变成小手形状。",
+                answer: "A",
+                type: "judgment"
+            },
+            {
+                question: "网页又称Web页，是基本的浏览单位。",
+                answer: "A",
+                type: "judgment"
+            },
+            {
+                question: "黑客侵入他人系统体现高超的计算机操作能力，我们应向他们学习。",
+                answer: "B",
+                type: "judgment"
+            },
+            {
+                question: "电子邮件不受时间、地区的限制，可以随时上网使用。",
+                answer: "A",
+                type: "judgment"
+            },
+            {
+                question: "只能从网上下载文件，不能将自己的程序上传到网上。",
+                answer: "B",
+                type: "judgment"
+            },
+            {
+                question: "使用网络搜索时，每次只能使用一个关键词。",
+                answer: "B",
+                type: "judgment"
+            },
+            {
+                question: "由于因特网上的IP地址是唯一的，所以人只能有一个Email帐号。",
+                answer: "B",
+                type: "judgment"
+            },
+            {
+                question: "在上网浏览时可以将一个页面上的部分图片单独保存，但不可以将整个页面保存。",
+                answer: "B",
+                type: "judgment"
+            },
+            {
+                question: "Flash的补间动画分为形状补间和动作补间。",
+                answer: "A",
+                type: "judgment"
+            },
+            {
+                question: "Flash中，元件只能使用一次。",
+                answer: "B",
+                type: "judgment"
+            },
+            {
+                question: "Flash中的时间轴包括帧控制区和层控制区。",
+                answer: "A",
+                type: "judgment"
+            },
+            {
+                question: "Flash动画是由一幅幅静止画面按照时间顺序串起来的。",
+                answer: "A",
+                type: "judgment"
+            },
+            {
+                question: "空白关键帧是舞台上没有任何内容的关键顿。",
+                answer: "A",
+                type: "judgment"
+            },
+            {
+                question: "图片可以导入到Flash的动画中，但声音不行。",
+                answer: "B",
+                type: "judgment"
+            },
+            {
+                question: "在FlashMx中，当编辑某图层中的内容时，为了避免影响其他图层中的内容，可以将其他图层隐藏。",
+                answer: "A",
+                type: "judgment"
+            },
+            {
+                question: "创建补间动画时必须要有两个关键帧，否则不会有动画效果。",
+                answer: "A",
+                type: "judgment"
+            },
+            {
+                question: "Flash中，文本被分离为图形后，能继续使用文本工具对其进行编辑。",
+                answer: "B",
+                type: "judgment"
+            }
+        ]; 
+        // 随机打乱题目顺序
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        let selectedQuestions = shuffleArray([...questions]).slice(0, 10); // 随机选择10道题目
+        let currentQuestionIndex = 0;
+        let score = 0;
+
+        // 显示当前题目
+        function displayQuestion() {
+            const question = selectedQuestions[currentQuestionIndex];
+            document.getElementById('question-number').textContent = `第 ${currentQuestionIndex + 1} 题`;
+            document.getElementById('question-text').textContent = question.question;
+            const optionsContainer = document.getElementById('options-container');
+            const trueFalseOptions = document.getElementById('true-false-options');
+            optionsContainer.innerHTML = '';
+            trueFalseOptions.innerHTML = '';
+            trueFalseOptions.style.display = 'none';
+
+            // 显示题目类型
+            const questionType = document.createElement('div');
+            questionType.className = 'question-type';
+            if (question.type === 'single') {
+                questionType.textContent = '（单选题）';
+            } else if (question.type === 'multiple') {
+                questionType.textContent = '（多选题）';
+            } else if (question.type === 'judgment') {
+                questionType.textContent = '（判断题）';
+            }
+            optionsContainer.appendChild(questionType);
+
+            if (question.type === 'single' || question.type === 'multiple') {
+                question.options.forEach((option, index) => {
+                    const optionElement = document.createElement('div');
+                    optionElement.classList.add('option', 'bg-blue-500', 'hover:bg-blue-600', 'text-white', 'py-2', 'px-4', 'rounded', 'cursor-pointer', 'mb-2');
+                    
+                    // 添加选项标签 (A, B, C, D)
+                    const optionLabel = document.createElement('span');
+                    optionLabel.className = 'option-label';
+                    optionLabel.textContent = `${String.fromCharCode(65 + index)}.`;
+                    optionElement.appendChild(optionLabel);
+                    
+                    // 添加选项文本
+                    optionElement.appendChild(document.createTextNode(option));
+                    
+                    optionElement.dataset.value = String.fromCharCode(65 + index);
+                    
+                    optionElement.addEventListener('click', () => {
+                        if (question.type === 'single') {
+                            const options = document.querySelectorAll('.option');
+                            options.forEach(opt => opt.classList.remove('selected'));
+                            optionElement.classList.add('selected');
+                        } else {
+                            optionElement.classList.toggle('selected');
+                        }
+                    });
+                    optionsContainer.appendChild(optionElement);
+                });
+            } else if (question.type === 'judgment') {
+                const trueOption = document.createElement('div');
+                trueOption.textContent = '正确';
+                trueOption.dataset.value = 'A';
+                trueOption.classList.add('cursor-pointer');
+                const falseOption = document.createElement('div');
+                falseOption.textContent = '错误';
+                falseOption.dataset.value = 'B';
+                falseOption.classList.add('cursor-pointer');
+                trueOption.addEventListener('click', () => {
+                    const options = document.querySelectorAll('#true-false-options div');
+                    options.forEach(opt => opt.classList.remove('selected'));
+                    trueOption.classList.add('selected');
+                });
+                falseOption.addEventListener('click', () => {
+                    const options = document.querySelectorAll('#true-false-options div');
+                    options.forEach(opt => opt.classList.remove('selected'));
+                    falseOption.classList.add('selected');
+                });
+                trueFalseOptions.appendChild(trueOption);
+                trueFalseOptions.appendChild(falseOption);
+                trueFalseOptions.style.display = 'flex';
+            }
+
+            document.getElementById('submit-button').style.display = 'block';
+            document.getElementById('feedback-text').textContent = '';
+            document.getElementById('next-button').style.display = 'none';
+            document.getElementById('options-container').style.pointerEvents = 'auto';
+            if (trueFalseOptions.style.display === 'flex') {
+                trueFalseOptions.style.pointerEvents = 'auto';
+            }
+        }
+
+        // 检查用户选择的答案是否正确
+        function checkAnswer() {
+            const question = selectedQuestions[currentQuestionIndex];
+            const optionsContainer = document.getElementById('options-container');
+            const trueFalseOptions = document.getElementById('true-false-options');
+            let userAnswer = '';
+
+            if (question.type === 'single') {
+                const selectedOption = optionsContainer.querySelector('.option.selected');
+                if (selectedOption) {
+                    userAnswer = selectedOption.dataset.value;
+                }
+            } else if (question.type === 'multiple') {
+                const selectedOptions = Array.from(optionsContainer.querySelectorAll('.option.selected'));
+                userAnswer = selectedOptions.map(opt => opt.dataset.value).sort().join('');
+            } else if (question.type === 'judgment') {
+                const selectedOption = trueFalseOptions.querySelector('div.selected');
+                if (selectedOption) {
+                    userAnswer = selectedOption.dataset.value;
+                }
+            }
+
+            const feedbackText = document.getElementById('feedback-text');
+            if (userAnswer === question.answer) {
+                feedbackText.textContent = '回答正确！';
+                feedbackText.style.color = 'green';
+                score++;
+            } else {
+                if (question.type === 'judgment') {
+                    feedbackText.textContent = `回答错误，正确答案是：${question.answer === 'A' ? '正确' : '错误'}`;
+                } else if (question.type === 'multiple') {
+                    feedbackText.textContent = `回答错误，正确答案是：${question.answer.split('').join('、')}`;
+                } else {
+                    feedbackText.textContent = `回答错误，正确答案是：${question.answer}`;
+                }
+                feedbackText.style.color = 'red';
+            }
+            document.getElementById('score').textContent = score;
+            document.getElementById('submit-button').style.display = 'none';
+            document.getElementById('next-button').style.display = 'block';
+            document.getElementById('options-container').style.pointerEvents = 'none';
+            if (trueFalseOptions.style.display === 'flex') {
+                trueFalseOptions.style.pointerEvents = 'none';
+            }
+        }
+
+        // 进入下一题
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < selectedQuestions.length) {
+                displayQuestion();
+            } else {
+                alert(`测试结束，你的总得分是：${score}/${selectedQuestions.length}`);
+                resetQuiz();
+            }
+        }
+
+        // 重置测试
+        function resetQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            selectedQuestions = shuffleArray([...questions]).slice(0, 10);
+            displayQuestion();
+            document.getElementById('score').textContent = score;
+        }
+
+        // 初始化测试
+        displayQuestion();
+        document.getElementById('submit-button').addEventListener('click', checkAnswer);
+        document.getElementById('next-button').addEventListener('click', nextQuestion);
+    </script>
+</body>
+</html>
